@@ -14,8 +14,10 @@
 
 import 'package:cosmosdb/model/query.dart';
 import 'package:cosmosdb/model/request_options.dart';
+import 'package:cosmosdb/model/operation_options.dart';
 import 'package:cosmosdb/src/cosmosdb_http_client.dart';
 import 'package:cosmosdb/src/model/resource_type.dart';
+
 
 /// Access documents in cosmosdb collections
 class DocumentApi {
@@ -111,4 +113,23 @@ class DocumentApi {
       headers: options.toHeaders(),
     );
   }
+
+  /// Updates the given document in the given collection
+  Future<Map<String, dynamic>> update(
+      String databaseId,
+      String collectionId,
+      String documentId, {
+        CosmosRequestOptions? options,
+       required List<CosmosOperationsOptions> operations
+      }) async {
+    options ??= CosmosRequestOptions(partitionKeys: [documentId]);
+    return await _client.patch(
+      'dbs/$databaseId/colls/$collectionId/docs/$documentId',
+      operations,
+      removeLastPart: false,
+      resourceType: ResourceType.item,
+      headers: options.toHeaders(),
+    );
+  }
+
 }

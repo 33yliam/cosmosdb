@@ -18,6 +18,7 @@ import 'package:cosmosdb/src/model/resource_type.dart';
 import 'package:cosmosdb/src/utils/auth_token_utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:universal_io/io.dart';
+import 'package:cosmosdb/model/operation_options.dart';
 
 /// An abstraction for the http client to handle common operations
 class CosmosDBHttpClient {
@@ -62,7 +63,8 @@ class CosmosDBHttpClient {
     request.headers.addAll(headers);
     request.headers.addAll({
       'x-ms-date': HttpDate.format(date),
-      'x-ms-version': '2018-09-17',
+      // 'x-ms-version': '2018-09-17',
+      'x-ms-version': '2018-12-31',
       'authorization': AuthTokenUtils.generateAuthToken(signature: signature)
     });
     final result = await _httpClient.send(request);
@@ -148,6 +150,24 @@ class CosmosDBHttpClient {
       path,
       removeLastPart: removeLastPart,
       body: body,
+      resourceType: resourceType,
+      headers: {'Content-Type': 'application/json', ...headers},
+    );
+  }
+
+  /// Executes a PATCH request
+  Future<Map<String, dynamic>> patch(
+    String path,
+    List<CosmosOperationsOptions> operations, {
+    required bool removeLastPart,
+    ResourceType resourceType = ResourceType.none,
+    Map<String, String> headers = const {},
+  }) {
+    return _executeRequest(
+      'patch',
+      path,
+      removeLastPart: removeLastPart,
+      body: {'operations': operations.map((e) => e.toJSON()).toList()},
       resourceType: resourceType,
       headers: {'Content-Type': 'application/json', ...headers},
     );
